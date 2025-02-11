@@ -12,3 +12,16 @@
   justify-content: center;
   min-height: 100vh;
 }
+
+form div {
+  margin: 8px 0;
+}
+
+.chart-container {
+  margin: 20px 0;
+}
+
+.error {
+  color: firebrick;
+  margin: 8px 0;
+}
