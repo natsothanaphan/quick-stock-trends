@@ -27,8 +27,9 @@ form input[type="text"] {
   max-width: 360px;
 }
 
-.chart-container {
-  margin: 20px 0;
+.charts {
+  width: 100%;
+  max-width: 960px;
 }
 
 .error {

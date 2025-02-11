@@ -66,13 +66,13 @@ function App() {
         {closeChartData && (
           <PercentageLineChart
             chartData={closeChartData}
-            title="Closing Price % Change"
+            title="Closing Price"
           />
         )}
         {volumeChartData && (
           <PercentageLineChart
             chartData={volumeChartData}
-            title="Volume % Change"
+            title="Volume"
           />
         )}
       </div>

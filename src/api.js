@@ -1,8 +1,24 @@
 function getRandomColor() {
-  const r = Math.floor(Math.random() * 200);
-  const g = Math.floor(Math.random() * 200);
-  const b = Math.floor(Math.random() * 200);
-  return `rgb(${r}, ${g}, ${b})`;
+   let themeMode = import.meta.env.VITE_THEME_MODE;
+   if (themeMode === "light") {
+    themeMode = "light";
+   } else if (themeMode === "dark") {
+    themeMode = "dark";
+   } else {
+    themeMode = window.matchMedia('(prefers-color-scheme: light)').matches ? "light" : "dark";
+   }
+
+  if (themeMode === "light") {
+    const r = Math.floor(Math.random() * 192);
+    const g = Math.floor(Math.random() * 192);
+    const b = Math.floor(Math.random() * 192);
+    return `rgb(${r}, ${g}, ${b})`;
+  } else {
+    const r = 255 - Math.floor(Math.random() * 192);
+    const g = 255 - Math.floor(Math.random() * 192);
+    const b = 255 - Math.floor(Math.random() * 192);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
 }
 
 /**
