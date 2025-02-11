@@ -1,5 +1,5 @@
 const logger = require("firebase-functions/logger");
-
+const fetch = require('node-fetch');
 // Helper to parse price fields (removes "$" and converts to float)
 const parsePrice = (str) => {
   if (!str) return null;
@@ -20,6 +20,7 @@ async function getNasdaqHistoricalData(symbol, startDate) {
   // Construct the Nasdaq API URL for the given symbol and startDate
   const url = `https://api.nasdaq.com/api/quote/${symbol}/historical?assetclass=stocks&fromdate=${startDate}&limit=400`;
   
+  logger.info('start request', url);
   const response = await fetch(url, {
     headers: {
       'User-Agent': 'Mozilla/5.0',
