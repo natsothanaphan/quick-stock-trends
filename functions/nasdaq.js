@@ -1,5 +1,6 @@
 const logger = require("firebase-functions/logger");
 const fetch = require('node-fetch');
+
 // Helper to parse price fields (removes "$" and converts to float)
 const parsePrice = (str) => {
   if (!str) return null;
@@ -20,7 +21,7 @@ async function getNasdaqHistoricalData(symbol, startDate) {
   // Construct the Nasdaq API URL for the given symbol and startDate
   const url = `https://api.nasdaq.com/api/quote/${symbol}/historical?assetclass=stocks&fromdate=${startDate}&limit=400`;
   
-  logger.info('start request', url);
+  logger.info('Fetching data from Nasdaq', url);
   const response = await fetch(url, {
     headers: {
       'User-Agent': 'Mozilla/5.0',
@@ -29,7 +30,7 @@ async function getNasdaqHistoricalData(symbol, startDate) {
   });
   
   if (!response.ok) {
-    throw new Error(`Failed to fetch data for symbol ${symbol}`);
+    throw new Error(`Failed to fetch data from Nasdaq for symbol ${symbol}`);
   }
   
   const json = await response.json();
@@ -37,7 +38,7 @@ async function getNasdaqHistoricalData(symbol, startDate) {
 
   // Ensure the expected data structure exists
   if (!json.data || !json.data.tradesTable || !json.data.tradesTable.rows) {
-    throw new Error(`Invalid data format received for symbol ${symbol}`);
+    throw new Error(`Invalid data format received from Nasdaq for symbol ${symbol}`);
   }
   
   // Clean and transform each OHLCV row

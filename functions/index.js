@@ -1,11 +1,19 @@
+require('dotenv').config({ path: ['.env', '.env.default'] });
+
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { onRequest } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const { getNasdaqHistoricalData } = require("./nasdaq");
+const { getTiingoHistoricalData } = require("./tiingo");
 
 setGlobalOptions({ region: 'asia-southeast1' });
 
-// New endpoint to fetch historical OHLCV data from Nasdaq API
+const API_PROVIDER = process.env.API_PROVIDER.toLowerCase();
+if (API_PROVIDER !== "nasdaq" && API_PROVIDER !== "tiingo") {
+  throw new Error("API_PROVIDER must be either 'nasdaq' or 'tiingo'");
+}
+
+// New endpoint to fetch historical OHLCV data from Nasdaq or Tiingo API
 exports.getHistoricalData = onRequest(async (req, res) => {
   if (req.method === 'OPTIONS') {
     res.set('Access-Control-Allow-Methods', 'GET');
@@ -59,9 +67,13 @@ exports.getHistoricalData = onRequest(async (req, res) => {
       symbolList.push({raw: rawSym, market: parts[0], symbol: parts[1]});
     }
 
-    // Fetch data for all symbols concurrently using the NASDAQ module
+    logger.info("Using API provider:", API_PROVIDER);
+    // Fetch data for all symbols concurrently using the appropriate module
     const results = await Promise.all(symbolList.map(({raw, market, symbol}) => 
-      getNasdaqHistoricalData(symbol, startDate)
+      (API_PROVIDER === "tiingo"
+        ? getTiingoHistoricalData(symbol, startDate)
+        : getNasdaqHistoricalData(symbol, startDate)
+      )
         .then(data => ({ raw, market, symbol, data }))
         .catch(error => ({ raw, market, symbol, error: error.message }))
     ));
