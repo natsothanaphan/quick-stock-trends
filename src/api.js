@@ -1,26 +1,3 @@
-function getRandomColor() {
-   let themeMode = import.meta.env.VITE_THEME_MODE;
-   if (themeMode === "light") {
-    themeMode = "light";
-   } else if (themeMode === "dark") {
-    themeMode = "dark";
-   } else {
-    themeMode = window.matchMedia('(prefers-color-scheme: light)').matches ? "light" : "dark";
-   }
-
-  if (themeMode === "light") {
-    const r = Math.floor(Math.random() * 192);
-    const g = Math.floor(Math.random() * 192);
-    const b = Math.floor(Math.random() * 192);
-    return `rgb(${r}, ${g}, ${b})`;
-  } else {
-    const r = 255 - Math.floor(Math.random() * 192);
-    const g = 255 - Math.floor(Math.random() * 192);
-    const b = 255 - Math.floor(Math.random() * 192);
-    return `rgb(${r}, ${g}, ${b})`;
-  }
-}
-
 /**
  * Fetches historical stock data and returns the formatted datasets
  * for closing price and volume percentage changes.
@@ -69,24 +46,14 @@ export async function fetchHistoricalData(symbols, startDate) {
       y: (((item.volume - baselineVolume) / baselineVolume) * 100).toFixed(2)
     }));
 
-    const color = getRandomColor();
-
     closeDatasets.push({
       label: key,
       data: closePoints,
-      borderColor: color,
-      backgroundColor: color,
-      fill: false,
-      tension: 0.2,
     });
 
     volumeDatasets.push({
       label: key,
       data: volumePoints,
-      borderColor: color,
-      backgroundColor: color,
-      fill: false,
-      tension: 0.2,
     });
   }
 

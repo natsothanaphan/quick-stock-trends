@@ -18,7 +18,7 @@ const parseVolume = (str) => {
 
 async function getNasdaqHistoricalData(symbol, startDate) {
   // Construct the Nasdaq API URL for the given symbol and startDate
-  const url = `https://api.nasdaq.com/api/quote/${symbol}/historical?assetclass=stocks&fromdate=${startDate}`;
+  const url = `https://api.nasdaq.com/api/quote/${symbol}/historical?assetclass=stocks&fromdate=${startDate}&limit=400`;
   
   const response = await fetch(url, {
     headers: {

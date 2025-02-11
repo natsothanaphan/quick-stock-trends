@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PercentageLineChart from "./components/PercentageLineChart";
 import { fetchHistoricalData } from "./api";
+import { addVisualsToBothCharts } from "./chart/chartUtils";
 import "./App.css";
 
 function App() {
@@ -25,14 +26,29 @@ function App() {
     setLoading(true);
     try {
       const result = await fetchHistoricalData(symbolsInput, startDate);
-      setCloseChartData(result.closeChartData);
-      setVolumeChartData(result.volumeChartData);
+      const { closeChartData, volumeChartData, colorMapping } = addVisualsToBothCharts(
+        result.closeChartData,
+        result.volumeChartData
+      );
+      setCloseChartData(closeChartData);
+      setVolumeChartData(volumeChartData);
     } catch (err) {
       console.error(err);
       setApiError(err.message || "An error occurred while fetching data.");
     }
     setLoading(false);
   };
+
+  const handleRerollColors = () => {
+    if (closeChartData && volumeChartData) {
+      const { closeChartData: updatedClose, volumeChartData: updatedVolume, colorMapping } = addVisualsToBothCharts(
+        closeChartData,
+        volumeChartData
+      );
+      setCloseChartData(updatedClose);
+      setVolumeChartData(updatedVolume);
+    }
+  }
 
   return (
     <div className="App">
@@ -48,7 +64,7 @@ function App() {
           />
         </div>
         <div>
-          <label>Start Date: </label>
+          <label>Start date: </label>
           <input
             type="date"
             value={startDate}
@@ -66,7 +82,7 @@ function App() {
         {closeChartData && (
           <PercentageLineChart
             chartData={closeChartData}
-            title="Closing Price"
+            title="Closing price"
           />
         )}
         {volumeChartData && (
@@ -76,6 +92,13 @@ function App() {
           />
         )}
       </div>
+      {(closeChartData || volumeChartData) && (
+        <div className="reroll-container">
+          <button onClick={handleRerollColors} disabled={loading}>
+            Reroll colors
+          </button>
+        </div>
+      )}
     </div>
   );
 }

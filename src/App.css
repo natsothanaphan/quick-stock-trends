@@ -27,12 +27,16 @@ form input[type="text"] {
   max-width: 360px;
 }
 
+.error {
+  color: firebrick;
+  margin: 8px 0;
+}
+
 .charts {
   width: 100%;
   max-width: 960px;
 }
 
-.error {
-  color: firebrick;
+.reroll-container {
   margin: 8px 0;
 }
