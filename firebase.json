@@ -8,7 +8,9 @@
         ".git",
         "firebase-debug.log",
         "firebase-debug.*.log",
-        "*.local"
+        "*.local",
+        "**/testing/**",
+        "**/.secrets/**"
       ]
     }
   ],
@@ -21,9 +23,21 @@
     ],
     "rewrites": [
       {
-        "source": "/api/getHistoricalData",
-        "function": "getHistoricalData"
+        "source": "/api/**",
+        "function": "app"
       }
     ]
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "functions": {
+      "port": 5001
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
   }
 }
