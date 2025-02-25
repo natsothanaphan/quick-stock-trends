@@ -1,106 +1,80 @@
-import React, { useState } from "react";
-import PercentageLineChart from "./components/PercentageLineChart";
-import { fetchHistoricalData } from "./api";
-import { addVisualsToBothCharts } from "./chart/chartUtils";
-import "./App.css";
+import React, { useState } from 'react';
+import Auth from './components/Auth';
+import PercentageLineChart from './components/PercentageLineChart';
+import './App.css';
+import api from './api.js';
+import { addVisualsToBothCharts } from './chart/chartUtils.js';
+import { alertAndLogErr } from './utils.js';
 
-function App() {
-  const [symbolsInput, setSymbolsInput] = useState("");
-  const [startDate, setStartDate] = useState("");
+const App = () => {
+  const [user, setUser] = useState(null);
+
+  const [symbolsInput, setSymbolsInput] = useState('');
+  const [startDate, setStartDate] = useState('');
   const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState(null);
   const [closeChartData, setCloseChartData] = useState(null);
   const [volumeChartData, setVolumeChartData] = useState(null);
 
+  const handleSignIn = (user) => setUser(user);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setApiError(null);
-    setCloseChartData(null);
-    setVolumeChartData(null);
-
     if (!symbolsInput || !startDate) {
-      setApiError("Please enter both symbols and a start date.");
+      alertAndLogErr('Please enter both symbols and a start date.');
       return;
     }
 
     setLoading(true);
+    setCloseChartData(null);
+    setVolumeChartData(null);
     try {
-      const result = await fetchHistoricalData(symbolsInput, startDate);
-      const { closeChartData, volumeChartData, colorMapping } = addVisualsToBothCharts(
-        result.closeChartData,
-        result.volumeChartData
-      );
+      const idToken = await user.getIdToken();
+      const result = await api.fetchHistoricalData(idToken, symbolsInput, startDate);
+      const { closeChartData, volumeChartData } = addVisualsToBothCharts(result.closeChartData, result.volumeChartData);
       setCloseChartData(closeChartData);
       setVolumeChartData(volumeChartData);
     } catch (err) {
-      console.error(err);
-      setApiError(err.message || "An error occurred while fetching data.");
+      alertAndLogErr(err);
     }
     setLoading(false);
   };
 
   const handleRerollColors = () => {
-    if (closeChartData && volumeChartData) {
-      const { closeChartData: updatedClose, volumeChartData: updatedVolume, colorMapping } = addVisualsToBothCharts(
-        closeChartData,
-        volumeChartData
-      );
-      setCloseChartData(updatedClose);
-      setVolumeChartData(updatedVolume);
-    }
+    if (!(closeChartData && volumeChartData)) return;
+    const { closeChartData: updatedClose, volumeChartData: updatedVolume } =
+      addVisualsToBothCharts(closeChartData, volumeChartData);
+    setCloseChartData(updatedClose);
+    setVolumeChartData(updatedVolume);
+  };
+
+  if (!user) {
+    return <div className='App'><Auth onSignIn={handleSignIn} /></div>;
   }
 
   return (
-    <div className="App">
-      <h1>Quick Stock Trends</h1>
-      <form onSubmit={handleSubmit}>
+    <div className='App'>
+      <form className='submit-form' onSubmit={handleSubmit}>
         <div>
-          <label>Symbols: </label>
-          <input
-            type="text"
-            value={symbolsInput}
-            onChange={(e) => setSymbolsInput(e.target.value)}
-            placeholder="NASDAQ:AAPL, NASDAQ:META"
-          />
+          <label htmlFor='.form-symbols'>Symbols</label>
+          <input id='.form-symbols' type='text' value={symbolsInput}
+            onChange={(e) => setSymbolsInput(e.target.value)} placeholder='nasdaq:aapl,nasdaq:meta' required />
         </div>
         <div>
-          <label>Start date: </label>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
+          <label htmlFor='.form-start-date'>Start Date</label>
+          <input id='.form-start-date' type='date' value={startDate}
+            onChange={(e) => setStartDate(e.target.value)} required />
         </div>
-        <div>
-          <button type="submit" disabled={loading}>
-            {loading ? "Loading..." : "Submit"}
-          </button>
-        </div>
+        <button type='submit' title='Submit' disabled={loading}>{loading ? 'Loading...' : '🚀'}</button>
       </form>
-      {apiError && <div className="error">{apiError}</div>}
-      <div className="charts">
-        {closeChartData && (
-          <PercentageLineChart
-            chartData={closeChartData}
-            title="Closing price"
-          />
-        )}
-        {volumeChartData && (
-          <PercentageLineChart
-            chartData={volumeChartData}
-            title="Volume"
-          />
-        )}
-      </div>
-      {(closeChartData || volumeChartData) && (
-        <div className="reroll-container">
-          <button onClick={handleRerollColors} disabled={loading}>
-            Reroll colors
-          </button>
+      {(closeChartData || volumeChartData) && <>
+        <div className='charts'>
+          {closeChartData && <PercentageLineChart chartData={closeChartData} title='Closing Price' />}
+          {volumeChartData && <PercentageLineChart chartData={volumeChartData} title='Volume' />}
         </div>
-      )}
+        <button className='reroll-button' onClick={handleRerollColors} disabled={loading}>Reroll Colors</button>
+      </>}
     </div>
   );
-}
+};
 
 export default App;
